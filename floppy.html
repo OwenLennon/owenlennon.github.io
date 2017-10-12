@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<div>
+<canvas id="myCanvas" width="296" height="296" style="border:1px solid #d3d3d3;">
+<canvas id="myCanvas" width="296" height="296" style="border:1px solid #d3d3d3;">
+</div>
+</canvas>
+<script>
+var ULstate = "red" 
+var Ustate = "red" 
+var URstate = "red" 
+var LUstate = "blue" 
+var Lstate = "blue" 
+var LDstate = "blue" 
+var DLstate = "orange" 
+var Dstate = "orange" 
+var DRstate = "orange" 
+var RUstate = "green" 
+var Rstate = "green" 
+var RDstate = "green" 
+var FULstate = "white" 
+var FUstate = "white" 
+var FURstate = "white" 
+var FLstate = "white" 
+var Fstate = "white" 
+var FRstate = "white" 
+var FDLstate = "white" 
+var FDstate = "white" 
+var FDRstate = "white" 
+var scrambled = false 
+var solveStarted = false 
+var startTime 
+var timerGoing = false 
+var currentTime = "DNF" 
+var finalTime = 0 
+var times = [] 
+var times5 = [] 
+var bestAo5 = 100000000000 
+var times12 = [] 
+var bestAo12 = 100000000000 
+var times100 = [] 
+var bestAo100 = 100000000000 
+var orderedTimes = [] 
+
+function reDraw(){
+var c=document.getElementById("myCanvas") 
+var ctx=c.getContext("2d") 
+ctx.fillStyle = ULstate 
+ctx.fillRect(60,1,58,58) 
+ctx.fillStyle = Ustate 
+ctx.fillRect(119,1,58,58) 
+ctx.fillStyle = URstate 
+ctx.fillRect(178,1,58,58) 
+ctx.fillStyle = LUstate 
+ctx.fillRect(1,60,58,58) 
+ctx.fillStyle = Lstate 
+ctx.fillRect(1,119,58,58) 
+ctx.fillStyle = LDstate 
+ctx.fillRect(1,178,58,58) 
+ctx.fillStyle = DLstate 
+ctx.fillRect(60,237,58,58) 
+ctx.fillStyle = Dstate 
+ctx.fillRect(119,237,58,58) 
+ctx.fillStyle = DRstate 
+ctx.fillRect(178,237,58,58) 
+ctx.fillStyle = RUstate 
+ctx.fillRect(237,60,58,58) 
+ctx.fillStyle = Rstate 
+ctx.fillRect(237,119,58,58) 
+ctx.fillStyle = RDstate 
+ctx.fillRect(237,178,58,58) 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ctx.fillStyle = FULstate 
+ctx.fillRect(60,60,58,58) 
+ctx.fillStyle = FUstate 
+ctx.fillRect(119,60,58,58) 
+ctx.fillStyle = FURstate 
+ctx.fillRect(178,60,58,58) 
+ctx.fillStyle = FLstate 
+ctx.fillRect(60,119,58,58) 
+ctx.fillStyle = Fstate 
+ctx.fillRect(119,119,58,58) 
+ctx.fillStyle = FRstate 
+ctx.fillRect(178,119,58,58) 
+ctx.fillStyle = FDLstate 
+ctx.fillRect(60,178,58,58) 
+ctx.fillStyle = FDstate 
+ctx.fillRect(119,178,58,58) 
+ctx.fillStyle = FDRstate 
+ctx.fillRect(178,178,58,58)
+
+}
+document.onkeydown = checkKey
+function checkKey(event) {
+    var key = event.keyCode
+	if (key == 38){
+	event.preventDefault()
+	moveStarted()
+	up()
+	}
+	if (key == 40){
+	event.preventDefault()
+	moveStarted()
+	down()
+	}
+	if (key == 37){
+	event.preventDefault()
+	moveStarted()
+	left()
+	}
+	if (key == 39){
+	event.preventDefault()
+	moveStarted()
+	right()
+	}
+	if (key == 32){
+	event.preventDefault()
+	scramble()
+	}
+
+	reDraw()
+}	
+setInterval(updateTimer, 10)
+function updateTimer(){
+	var d = new Date()
+		n = d.getTime()
+	currentTime = (n - startTime) / 1000
+	if (timerGoing == true){
+	document.getElementById("time").innerHTML = (currentTime)
+	}
+	else {
+		document.getElementById("time").innerHTML = (finalTime)
+		document.getElementById("current").innerHTML = (finalTime)
+
+	    }
+}
+function moveStarted(){
+	if (solveStarted == false && scrambled == true){
+			var d = new Date()
+			startTime = d.getTime()
+			solveStarted = true
+			timerGoing = true
+			 
+	}
+}
+function moveDone(){
+	
+	var d = new Date()
+	var n 
+	var o
+	if ((checkSolved())){
+		if (scrambled == true){
+		var e = new Date()
+		o = e.getTime()
+		timerGoing = false
+		finalTime = ((o - startTime) / 1000)
+		times.push(finalTime)
+		orderedTimes.push(finalTime)
+		times5.push(finalTime)
+		if (times5.length > 5){
+			times5.splice(0, 1)
+		}
+		times12.push(finalTime)
+		if (times12.length > 12){
+			times12.splice(0, 1)
+		}
+		times100.push(finalTime)
+		if (times100.length > 100){
+			times100.splice(0, 1)
+		}
+		updateAverage()
+		scrambled = false
+		}
+	}
+	else{
+		if (scrambled == true){
+		var d = new Date()
+		n = d.getTime()
+		}
+		
+	}
+}
+
+function up(){
+	if (FUstate == "white"){
+		FUstate = "yellow"
+	}
+	else{
+		FUstate = "white"
+	}
+	var FULtemp = FULstate
+    if (FURstate == "white"){
+		FULstate = "yellow"
+	}
+	else{
+		FULstate = "white"
+	}
+	if (FULtemp == "white"){
+		FURstate = "yellow"
+	}
+	else{
+		FURstate = "white"
+	}
+	var URtemp = URstate
+		URstate = ULstate
+		ULstate = URtemp
+	var RUtemp = RUstate
+		RUstate = LUstate
+		LUstate = RUtemp
+		moveDone()
+
+		
+		
+}
+
+function down(){
+	if (FDstate == "white"){
+		FDstate = "yellow"
+	}
+	else{
+		FDstate = "white"
+	}
+	var FDLtemp = FDLstate
+    if (FDRstate == "white"){
+		FDLstate = "yellow"
+	}
+	else{
+		FDLstate = "white"
+	}
+	if (FDLtemp == "white"){
+		FDRstate = "yellow"
+	}
+	else{
+		FDRstate = "white"
+	}
+	var DRtemp = DRstate
+		DRstate = DLstate
+		DLstate = DRtemp
+		var RDtemp = RDstate
+		RDstate = LDstate
+		LDstate = RDtemp
+		moveDone()
+
+}
+
+function left(){
+	if (FLstate == "white"){
+		FLstate = "yellow"
+	}
+	else{
+		FLstate = "white"
+	}
+	var FULtemp = FULstate
+    if (FDLstate == "white"){
+		FULstate = "yellow"
+	}
+	else{
+		FULstate = "white"
+	}
+	if (FULtemp == "white"){
+		FDLstate = "yellow"
+	}
+	else{
+		FDLstate = "white"
+	}
+	var ULtemp = ULstate
+		ULstate = DLstate
+		DLstate = ULtemp
+	var LUtemp = LUstate
+		LUstate = LDstate
+		LDstate = LUtemp
+		moveDone()
+	
+}
+
+function right(){
+	if (FRstate == "white"){
+		FRstate = "yellow"
+	}
+	else{
+		FRstate = "white"
+	}
+	var FURtemp = FURstate
+    if (FDRstate == "white"){
+		FURstate = "yellow"
+	}
+	else{
+		FURstate = "white"
+	}
+	if (FURtemp == "white"){
+		FDRstate = "yellow"
+	}
+	else{
+		FDRstate = "white"
+	}
+	var URtemp = URstate
+		URstate = DRstate
+		DRstate = URtemp
+	var RUtemp = RUstate
+		RUstate = RDstate
+		RDstate = RUtemp
+	moveDone()
+}
+
+function scramble(){
+	var added = Math.floor(Math.random * 4)
+	if (scrambled == false){
+	var length = (Math.floor(Math.random() * 4)) + 50
+	for (i = 0; i < length; i++) { 
+    var move = Math.floor((Math.random() * 4) + 1)
+	
+	if (move == 1){
+		up()
+	}
+	if (move == 2){
+		down()
+	}
+	if (move == 3){
+		left()
+	}
+	if (move == 4){
+		right()
+	}
+	}
+	if (checkSolved()){
+	scramble()
+	}
+	solveStarted = false
+	scrambled = true
+	}
+}
+function checkSolved(){
+	var stickers = 0;
+	if (FURstate == "white" && FUstate == "white" && FULstate == "white"){
+		stickers++
+	}
+	if (FRstate == "white" && Fstate == "white" && FLstate == "white"){
+		stickers++
+	}
+	if (FDRstate == "white" && FDstate == "white" && FDLstate == "white"){
+		stickers++
+	}
+	if (ULstate == "red" && Ustate == "red" && URstate == "red"){
+		stickers++
+	}
+	if (DLstate == "orange" && Dstate == "orange" && DRstate == "orange"){
+		stickers++
+	}
+	if (LUstate == "blue" && Lstate == "blue" && LDstate == "blue"){
+		stickers++
+	}
+	if (RUstate == "green" && Rstate == "green" && Rstate == "green"){
+		stickers++
+	}
+	if (stickers == 7){
+		return true;
+	}
+	else{
+		return false
+	}
+}	
+
+function getAo5(tms){
+	if (tms.length > 4){
+	tms.sort(function(a, b){return a-b})
+	tms.splice(0, 1)
+	tms.splice(tms.length - 1, 1)
+	var sum 
+	sum = tms[0] + tms[1] + tms[2]
+	
+	return roundTime(sum / 3)
+	}
+	else {
+		return "DNF"
+	}
+}
+
+function getAo12(tms){
+	if (tms.length > 11){
+	tms.sort(function(a, b){return a-b})
+	tms.splice(0, 1)
+	tms.splice(tms.length - 1, 1)
+	var sum 
+	sum = tms[0] + tms[1] + tms[2] + tms[3] + tms[4] + tms[5] + tms[6] + tms[7] + tms[8] + tms[9]
+	
+	return roundTime(sum / 10)
+	}
+	else {
+		return "DNF"
+		
+	}
+}
+
+function getAo100(tms){
+	if (tms.length > 99){
+	tms.sort(function(a, b){return a-b})
+	tms.splice(0, 1)
+	tms.splice(tms.length - 1, 1)
+	var sum = 0
+	for (i = 0; i < tms.length; i++) { 
+    sum = sum + tms[i]
+	}	
+	return roundTime(sum / 98)
+	}
+	else {
+		return "DNF"
+	}
+}
+
+function roundTime(time){
+	return ((Math.round(time * 1000))/1000)
+}
+
+function updateAverage(){
+	var sum = 0
+	var sortedTimes = times.sort(function(a, b){return a-b});
+	for (i = 0; i < times.length; i++) { 
+    sum = sum + times[i]
+	}
+	var average = sum / times.length;
+	var best = sortedTimes[0]
+	var ftimes = [];
+	for (i = 0; i < times5.length; i++) { 
+    ftimes.push(times5[i])
+	}
+	var ao5 = getAo5(ftimes)
+	if (ao5 < bestAo5){
+		bestAo5 = ao5
+	}
+	ftimes = [];
+	for (i = 0; i < times12.length; i++) { 
+    ftimes.push(times12[i])
+	}
+	var ao12 = getAo12(ftimes)
+	if (ao12 < bestAo12){
+		bestAo12 = ao12
+	}
+	ftimes = [];
+	for (i = 0; i < times100.length; i++) { 
+    ftimes.push(times100[i])
+	}
+	var ao100 = getAo100(ftimes)
+	if (ao100 < bestAo100){
+		bestAo100 = ao100
+	}
+	average = roundTime(average);
+	document.getElementById("times").innerHTML = ("Solves: " + times.length);
+	document.getElementById("average").innerHTML = (average);
+	document.getElementById("ao5").innerHTML = (ao5);
+	document.getElementById("bestAo5").innerHTML = (bestAo5);
+	document.getElementById("ao12").innerHTML = (ao12);
+	document.getElementById("bestAo12").innerHTML = (bestAo12);
+	document.getElementById("ao100").innerHTML = (ao100);
+	document.getElementById("bestAo100").innerHTML = (bestAo100);
+	document.getElementById("best").innerHTML = (best);
+	if (bestAo5 > 1000000){
+	document.getElementById("bestAo5").innerHTML = ("DNF");
+	}
+	if (isNaN(ao5)){
+	document.getElementById("ao5").innerHTML = ("DNF");
+	}
+	if (bestAo12 > 1000000){
+	document.getElementById("bestAo12").innerHTML = ("DNF");
+	}
+	if (isNaN(ao12)){
+	document.getElementById("ao12").innerHTML = ("DNF");
+	}
+	if (bestAo100 > 1000000){
+	document.getElementById("bestAo100").innerHTML = ("DNF");
+	}
+	if (isNaN(ao100)){
+	document.getElementById("ao100").innerHTML = ("DNF");
+	}
+	if (isNaN(average)){
+	document.getElementById("average").innerHTML = ("DNF");
+	}
+	if (best == undefined){
+	document.getElementById("best").innerHTML = ("DNF");
+	}
+	$('#textbox').val(orderedTimes)
+
+}
+$(document).ready(function(){
+timerGoing = false
+var c=document.getElementById("myCanvas")
+var ctx=c.getContext("2d")
+ctx.fillRect(0,0,300,300)
+reDraw()
+updateAverage()
+});
+</script>
+
+<div style="float:left">
+<b><h2 id="time"></h2></b>
+<p id="times"></p>
+</div>
+<div style="padding: 20px 0;">
+<textarea rows="4" cols="26" style="color:blue;margin-left:30px; display: inline;" id="textbox"></textarea>
+</div>
+<div style="float:left">
+<table border = "1">
+<tr>
+<td></td>
+<td>Current</td>
+<td>Best</td>
+</tr>
+<tr>
+<td>Single</td>
+<td id="current"></td>
+<td id="best"></td>
+</tr>
+<tr>
+<td>Average of 5</td>
+<td id="ao5"></td>
+<td id="bestAo5"></td>
+</tr>
+<tr>
+<td>Average of 12</td>
+<td id="ao12"></td>
+<td id="bestAo12"></td>
+</tr>
+<td>Average of 100</td>
+<td id="ao100"></td>
+<td id="bestAo100"></td>
+</tr>
+</table>
+Session Average: <text id="average"></text>
+</div>
+<br>
+<br>
+</head>
+</html>
