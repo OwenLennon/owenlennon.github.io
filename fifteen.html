@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<p id="row1"></p>
+<p id="row2"></p>
+<p id="row3"></p>
+<p id="row4"></p>
+<p id="blank"></p>
+<p id="blanky"></p>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<div>
+<canvas id="myCanvas" width="500" height="500" style="border:1px solid #d3d3d3;">
+</div>
+</canvas>
+<div style="float:left">
+<h2 id="time">0</h2>      
+</div>
+<div style="padding: 23px 70px;">
+<form>
+<select id="drop">
+  <option value=2>2</option>
+  <option value=3>3</option>
+  <option value=4>4</option>
+  <option value=5>5</option>
+  <option value=6>6</option>
+  <option value=7>7</option>
+  <option value=8>8</option>
+  <option value=9>9</option>
+  <option value=10>10</option>
+</select>
+<button id="reset" type="button" onclick="resetBoard()">Reset</button>
+</form>
+</div>
+
+
+
+<script>
+document.getElementById("drop").value = 4
+var size = 4
+var tiles = new Array()
+var p
+var q
+var blankx = size - 1 
+var blanky = size - 1
+var solvedstate
+var state = "solved"
+var time = 0
+var starttime
+var finaltime = 0
+var timerrunning = false
+resetBoard()
+document.onkeydown = checkKey
+
+function checkKey(event) {
+    var key = event.keyCode
+	if (key == 37){
+	event.preventDefault()
+	leftMove()
+	}
+	if (key == 38){
+	event.preventDefault()
+	upMove()
+	}
+	if (key == 39){
+	event.preventDefault()
+	rightMove()
+	}
+	if (key == 40){
+	event.preventDefault()
+	downMove()
+	}
+	if (key == 32){
+	event.preventDefault()
+	if (state == "solved") {
+	scramble()
+	}
+	}
+	drawBoard()
+	
+}	
+
+function moveMade() {
+	if (state == "scrambled") {
+		time = 0
+		state = "solving"
+		var d = new Date()
+		starttime = d.getTime()
+	}
+	
+	if (state == "solving" && solvedstate == tiles + " ") {
+		state = "solved"
+		finaltime = time
+		
+	}
+		
+}
+
+function rightMove() {
+	if (blankx > 0){
+	var placehold = tiles[blanky][blankx - 1]
+	tiles[blanky][blankx - 1] = tiles[blanky][blankx]
+	tiles[blanky][blankx] = placehold
+	blankx = blankx - 1 
+	moveMade()
+	}
+
+}
+function leftMove() {
+	if (blankx < size - 1) {
+	var placehold = tiles[blanky][blankx + 1]
+	tiles[blanky][blankx + 1] = tiles[blanky][blankx]
+	tiles[blanky][blankx] = placehold
+	blankx = blankx + 1 
+	moveMade()
+	}
+}
+function upMove() {
+	if (blanky < size - 1) {
+	var placehold = tiles[blanky + 1][blankx]
+	tiles[blanky + 1][blankx] = tiles[blanky][blankx]
+	tiles[blanky][blankx] = placehold
+	blanky = blanky + 1 
+	moveMade()
+	}
+}
+function downMove() {
+	if (blanky > 0) {
+	var placehold = tiles[blanky - 1][blankx]
+	tiles[blanky - 1][blankx] = tiles[blanky][blankx]
+	tiles[blanky][blankx] = placehold
+	blanky = blanky - 1 
+	moveMade()
+	}
+}
+function scramble(){
+	var added = Math.floor(Math.random * 4)
+	var length = Math.pow(Math.pow(size,2), 3)
+	for (i = 0; i < length; i++) { 
+    var move = Math.floor((Math.random() * 4) + 1)
+	
+	if (move == 1){
+		upMove()
+	}
+	if (move == 2){
+		downMove()
+	}
+	if (move == 3){
+		leftMove()
+	}
+	if (move == 4){
+		rightMove()
+	}
+	
+	}
+	state = "scrambled"
+	
+	
+}
+
+function resetBoard() {
+
+	size = parseInt(document.getElementById("drop").value);
+	blankx = size - 1
+	blanky = size - 1
+	for (p = 0; p < (size); p++) {
+	tiles[p] = new Array()
+	for (q = 1; q < (size + 1); q++) {
+	tiles[p].push(q + (p*size))	 
+	}
+	}
+	solvedstate = tiles + " "
+	drawBoard()
+	document.getElementById("reset").blur();
+	state = "solved"
+	finaltime = 0
+	
+	
+}
+
+function drawBoard() {
+	
+	var c=document.getElementById("myCanvas") 
+	var ctx=c.getContext("2d") 
+	var i;
+	var j;
+	var s = size
+	ctx.fillStyle = "black" 
+	ctx.fillRect(1,1, (c.width), (c.width))
+	for (j = 0; j < s; j++){
+	for (i = 0; i < s; i++) {
+	if (i == blankx && j == blanky){
+	ctx.fillStyle = "black" 
+	}
+	else {
+	var n = parseInt(tiles[j][i])
+	if (n === 0 || !!(n && !(n%2)) ) {
+	ctx.fillStyle = "white" 
+	}
+	else {
+	ctx.fillStyle = "red" 
+	}
+	}
+	ctx.fillRect((c.width/(s)) * i, (c.width/(s)) * j,(c.width/(s)) - 3,(c.width/(s)) - 3)
+	ctx.fillStyle = "black" 
+	ctx.font = ((c.width/s) * 0.40 ) + "px Arial";
+	ctx.textAlign = "center";
+	ctx.fillText(tiles[j][i], c.width/(2 *(s)) + (c.width/s) * i, ((c.width/s)/1.5) +(c.width/s) * j); 
+	
+
+	} 
+	}
+setInterval(keepTime, 10)
+function keepTime() {
+
+	var d = new Date()
+	n = d.getTime()
+	time = (n - starttime) / 1000
+
+	if (state == "solving") {
+	document.getElementById("time").innerHTML = time;
+	}
+	else {
+	document.getElementById("time").innerHTML = finaltime;
+	}
+}
+
+
+}
+</script>
+
+</html>
