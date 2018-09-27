@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<div>
+<canvas id="myCanvas" width="250" height="500" style="border:1px solid #d3d3d3;">
+</div>
+</canvas>
+<h2 id="time"></h2>    
+<script>
+var lines = 0
+var tiles = new Array()
+var sides = new Array()
+var piece = new Array()
+var piece1 = new Array()
+var piece2 = new Array()
+var piece3 = new Array()
+var piece4 = new Array()
+var piece5 = new Array()
+var piece6 = new Array()
+var pieces = [piece1, piece2, piece3, piece4, piece5, piece6]
+for (p = 0; p < 21; p++) {
+	tiles[p] = new Array()
+	for (q = 0; q < 10; q++) {
+	tiles[p].push(0)	 
+}
+}
+	tiles[20] = new Array()
+	for (q = 0; q < 22; q++) {
+	tiles[20].push("A")	 
+}
+docleanup=false
+piece1[0] = new Array
+piece1[0].push(1,1,1)
+piece1[1] = new Array
+piece1[1].push(0,0,1)
+
+
+piece2[0] = new Array
+piece2[0].push(0,0,1)
+piece2[1] = new Array
+piece2[1].push(1,1,1)
+
+
+piece3[0] = new Array
+piece3[0].push(1,1,1)
+piece3[1] = new Array
+piece3[1].push(0,1,0)
+
+
+piece4[0] = new Array
+piece4[0].push(0,1,1)
+piece4[1] = new Array
+piece4[1].push(1,1,0)
+
+
+piece4[0] = new Array
+piece4[0].push(1,1,0)
+piece4[1] = new Array
+piece4[1].push(0,1,1)
+
+piece5[0] = new Array
+piece5[0].push(1,1)
+piece5[1] = new Array
+piece5[1].push(1,1)
+
+piece6[0] = new Array
+piece6[0].push(1,1,1,1)
+
+
+
+x = 3
+y = 0
+piece = piece1
+rpend = false
+lpend = false
+upend = false
+setInterval(updatePiece, 50);
+setInterval(gravity, 200);
+
+document.onkeydown = checkKey
+
+function checkKey(event) {
+    var key = event.keyCode
+	if (key == 37){
+	event.preventDefault()
+	lpend = true
+	
+	}
+	
+	if (key == 38){
+	event.preventDefault()
+	upend = true
+	}
+	
+	if (key == 39){
+	event.preventDefault()
+	rpend = true
+	}
+	
+	if (key == 40){
+	event.preventDefault()
+	Y = y + 0
+
+	}
+
+}	
+
+
+function gravity(){
+	y++
+}
+
+function updatePiece() {
+	document.getElementById("time").innerHTML = "Lines: " + lines
+	if (docleanup == true){
+		for (p = 0; p < 21; p++) {
+			for (q = 0; q < 10; q++) {
+				if (tiles[p][q] == 1) {
+					tiles[p][q] = "G"
+					clearLine()
+					y = 0
+					x = 3
+					piece = pieces[Math.floor(Math.random() * 6)]
+					docleanup = false
+
+				}
+			}
+	
+		}
+	}
+	
+	if (tiles[0].includes("G")){
+		alert("You lose!")
+		for (p = 0; p < 21; p++) {
+			for (q = 0; q < 10; q++) {
+				if (tiles[p][q] == "G") {
+					tiles[p][q] = 0
+				}
+			}
+		}
+		lines = 0
+		
+	}
+	if (detectTouch() == "good"){
+		side = detectSide();
+		for (p = 0; p < 21; p++) {
+			for (q = 0; q < 10; q++) {
+				if (tiles[p][q] == 1) {
+					tiles[p][q] = 0
+				}
+			}
+		}
+	
+	
+		if (rpend) {
+			if (sides.includes("right") == false){
+				x++
+			}
+			rpend=false
+		}
+		if (lpend) {
+			if (sides.includes("left") == false){
+				x--
+		}
+	lpend=false
+		}
+	if (upend) {
+		if (detectIntersect(rotate(piece)) == false){
+		piece = rotate(piece)
+		}
+		upend = false
+	}
+
+	for (n=0; n < piece.length; n++){
+		for (o=0; o < piece[n].length; o++){
+			if (piece[n][o] == 1) {
+
+			if (tiles[n+y][o+x] == 1){
+				y = y - 3
+			}
+			tiles[n+y][o+x] = piece[n][o]
+			
+	
+			}
+		} 
+	}
+	
+	
+	
+	}
+	
+	else {
+	docleanup=true
+	}
+	drawBoard()
+}	
+
+function rotate(n) {
+	var newarray = new Array
+	for (i = 0; i < n[0].length; i++){
+		newarray[i] = new Array
+		for (j = 0; j < n.length; j++){
+			newarray[i].push(n[j][i])	
+		}
+		newarray[i].reverse()
+	}
+	//alert(newarray)
+	n = newarray
+	return n
+}
+
+function drawBoard() {
+	
+	var c=document.getElementById("myCanvas") 
+	var ctx=c.getContext("2d") 
+	for (p = 0; p < 21; p++) {
+		for (q = 0; q < 10; q++) {
+			if (tiles[p][q] == 0) {
+				ctx.fillStyle = "black" 
+			} 
+			if (tiles[p][q] == "G") {
+				ctx.fillStyle = "white" 
+			} 
+			if (tiles[p][q] == "A") {
+				ctx.fillStyle = "red" 
+			} 
+			if (tiles[p][q] == 1) {
+				ctx.fillStyle = "yellow" 
+			} 
+		 ctx.fillRect(25 * q,25 * p, 25, 25)
+		}
+	}
+}
+
+function detectTouch() {
+	
+	counter = 0
+	for (p = 0; p < 21; p++) {
+		for (q = 0; q < 10; q++) {
+			if (tiles[p][q] == 1 && (tiles[p+1][q] == "G")) {
+				counter = counter + 1
+			}	
+			if (tiles[p][q] == 1 && (tiles[p+1][q] == "A")) {
+				counter = counter + 1
+		
+			}	
+
+		}
+	
+	}
+	
+	if (counter > 0){
+		return "down"
+	}
+	
+	else {
+		return "good"
+	}	
+}
+
+function detectSide() {
+	
+	sides = []
+	for (p = 0; p < 20; p++) {
+		for (q = 0; q < 9; q++) {
+			if (tiles[p][q] == 1 && tiles[p+1][q+1] == "G") {
+				sides.push("right")
+			}	
+			
+			if (tiles[p][9] == 1){
+				sides.push ("right")
+			}
+			
+			if (tiles[p][0] == 1){
+				sides.push ("left")
+			}
+	
+			if (tiles[p][q] == 1 && (tiles[p+1][q-1] == "G")) {
+				sides.push("left")
+			}	
+
+		}
+	
+	}
+}
+
+function detectIntersect(b) {
+	cttr = 0
+	for (n=0; n < b.length; n++){
+		for (o=0; o < b[n].length; o++){
+			if (b[n][o] == 1) {
+				if (tiles[n+y][o+x] != 0){
+				cttr++
+				}
+			
+	
+			}
+		} 
+	}
+	
+	if (cttr > 0){
+		return true
+	}
+	else{
+		return false
+	}
+}
+
+
+function clearLine() {
+	var plac = new Array()
+	for (q = 19; q > 0; q--) {
+		if (tiles[q].includes(0) == false){
+			for (r = q; r > 0; r--){
+				
+				plac = tiles[r - 1]
+				tiles[r] = plac.slice(0,19)
+			}
+			lines++		
+		}
+	}
+	
+
+	
+}
+</script>
+</html>
