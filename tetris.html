@@ -17,6 +17,7 @@ var piece3 = new Array()
 var piece4 = new Array()
 var piece5 = new Array()
 var piece6 = new Array()
+var piece7 = new Array()
 var pieces = [piece1, piece2, piece3, piece4, piece5, piece6]
 for (p = 0; p < 21; p++) {
 	tiles[p] = new Array()
@@ -67,14 +68,27 @@ piece6[0] = new Array
 piece6[0].push(1,1,1,1)
 
 
+piece7[0] = new Array
+piece7[0].push(1,1,1,1,1,1,1)
+piece7[1] = new Array
+piece7[1].push(1,1,1,1,1,1,1)
+piece7[2] = new Array
+piece7[2].push(1,1,1,1,1,1,1)
+piece7[3] = new Array
+piece7[3].push(1,1,1,1,1,1,1)
+piece7[4] = new Array
+piece7[4].push(1,1,1,1,1,1,1)
+
+
+
 
 x = 3
 y = 0
-piece = piece1
+piece = piece7
 rpend = false
 lpend = false
 upend = false
-setInterval(updatePiece, 50);
+setInterval(updatePiece, 10);
 setInterval(gravity, 200);
 
 document.onkeydown = checkKey
@@ -111,23 +125,9 @@ function gravity(){
 }
 
 function updatePiece() {
-	document.getElementById("time").innerHTML = "Lines: " + lines
-	if (docleanup == true){
-		for (p = 0; p < 21; p++) {
-			for (q = 0; q < 10; q++) {
-				if (tiles[p][q] == 1) {
-					tiles[p][q] = "G"
-					clearLine()
-					y = 0
-					x = 3
-					piece = pieces[Math.floor(Math.random() * 6)]
-					docleanup = false
-
-				}
-			}
 	
-		}
-	}
+	document.getElementById("time").innerHTML = "Lines: " + lines
+	
 	
 	if (tiles[0].includes("G")){
 		alert("You lose!")
@@ -190,7 +190,22 @@ function updatePiece() {
 	}
 	
 	else {
-	docleanup=true
+	for (p = 0; p < 21; p++) {
+			for (q = 0; q < 10; q++) {
+				if (tiles[p][q] == 1) {
+					tiles[p][q] = "G"
+					
+					y = 0
+					x = 3
+					
+					piece = pieces[Math.floor(Math.random() * 6)]
+					docleanup = false
+
+				}
+			}
+		
+		}
+		clearLine()
 	}
 	drawBoard()
 }	
@@ -309,15 +324,19 @@ function detectIntersect(b) {
 
 function clearLine() {
 	var plac = new Array()
+	for (p = 0; p < 19; p++){
 	for (q = 19; q > 0; q--) {
 		if (tiles[q].includes(0) == false){
 			for (r = q; r > 0; r--){
-				
 				plac = tiles[r - 1]
-				tiles[r] = plac.slice(0,19)
+				tiles[r] = plac.slice(0,11)
+				//drawboard()
 			}
+			
 			lines++		
+			
 		}
+	}
 	}
 	
 
